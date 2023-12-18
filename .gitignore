@@ -1,0 +1,11 @@
+__pycache__
+
+*.log
+prebuilt/*
+!prebuilt/*.json
+gentests
+
+dotCover.Output.*
+*.csv
+
+.DS_Store
