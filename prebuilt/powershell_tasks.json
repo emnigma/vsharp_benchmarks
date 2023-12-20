@@ -19,25 +19,11 @@
                 "TryParseSettingFileHelper"
             ]
         },
-        "Microsoft.PowerShell.Commands.Utility.dll": {
-            "ConvertToHtmlCommand": [
-                "BeginProcessing"
-            ],
-            "DebugRunspaceCommnd": [
-                "EndProcessing"
-            ],
-            "AddMemberCommand": [
-                "ProcessRecord"
-            ]
-        },
         "System.Management.Automation.dll": {
             "System.Management.Automation.ProxyCommand": [
                 "GetHelpComments",
                 "AppendType",
                 "GetObjText"
-            ],
-            "System.Management.Automation.DSCClassCache": [
-                "Initialize"
             ],
             "CommentHelpInfo": [
                 "GetCommentBlock"
@@ -47,8 +33,7 @@
             ],
             "ContainerParentJob": [
                 "ResumeJob",
-                "StartJob",
-                "GetHelpUri"
+                "StartJob"
             ]
         }
     }
