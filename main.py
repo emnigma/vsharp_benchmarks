@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 from datetime import datetime
@@ -12,16 +11,15 @@ from src.parsing import (
     load_prebuilt_config,
     parse_maps,
     parse_runner_output,
-    recurse_find,
 )
 from src.structs import RunResult
-from src.subprocess_calls import call_dotcover, call_test_runner
+from src.subprocess_calls import call_test_runner
 
 """
 Prepare:
 1) Remove double spaces in strs with methods
 2) Remove multiline comments with methods
-3) Build VSharp.Runner in Release mode: dotnet build -c Release .
+3) Build VSharp.Runner in Release mode: dotnet build -c Release
 4) Build all required .dlls
 5) Build VSharp.TestRunner
 """
@@ -31,7 +29,6 @@ def main():
     path2runner = (
         "/Users/emax/Data/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner"
     )
-    path2test_runner_dll = "/Users/emax/Data/VSharp/VSharp.TestRunner/bin/Release/net7.0/VSharp.TestRunner.dll"
     output_test_folder = "./gentests"
     strategy_name = "ExecutionTreeContributedCoverage"
     default_steps_limit = 3000
@@ -55,7 +52,7 @@ def main():
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/unity_tasks.json"
     )
 
-    # cosmos_os = load_prebuilt_config(path2cosmos_os_config, default_steps_limit)
+    cosmos_os = load_prebuilt_config(path2cosmos_os_config, default_steps_limit)
     powershell = load_prebuilt_config(path2powershell_config, default_steps_limit)
     unity = load_prebuilt_config(path2_unity_config, default_steps_limit)
 
@@ -63,7 +60,7 @@ def main():
         shutil.rmtree(output_test_folder)
     os.makedirs(output_test_folder)
 
-    launch_infos = powershell + unity + list(gameserver_dataset)
+    launch_infos = cosmos_os + powershell + unity + list(gameserver_dataset)
 
     results = []
 
@@ -87,26 +84,6 @@ def main():
             runner_coverage,
         ) = parse_runner_output(runner_output)
 
-        call_dotcover(
-            path2test_runner_dll=path2test_runner_dll,
-            tests_path=tests_path,
-            log_path=log_file_name,
-        )
-        with open(
-            "dotCover.Output.json", "r", encoding="utf-8-sig"
-        ) as dotcover_out_file:
-            dotcover_out = json.load(dotcover_out_file)
-
-        if (
-            dotcover_coverage := recurse_find(
-                launch_info.method.split("."), dotcover_out
-            )
-            != None
-        ):
-            dotcover_coverage = dotcover_coverage["CoveragePercent"]
-        else:
-            dotcover_coverage = 0
-
         results.append(
             attrs.asdict(
                 RunResult(
@@ -114,8 +91,7 @@ def main():
                     steps_made=steps_made,
                     tests=test_generated,
                     errors=errs_generated,
-                    runner_coverage_percent=runner_coverage,
-                    dotcover_coverage_percent=dotcover_coverage,
+                    precise_coverage_percent=runner_coverage,
                 )
             )
         )

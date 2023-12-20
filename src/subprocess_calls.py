@@ -23,7 +23,10 @@ def call_test_runner(
         strat_name,
         "--output",
         tests_path,
+        "--check-coverage",
     ]
+
+    print(" ".join(call))
 
     runner_output = subprocess.check_output(call, stderr=subprocess.STDOUT).decode(
         "utf-8"
@@ -32,25 +35,3 @@ def call_test_runner(
         raise RuntimeError(f"call {' '.join(call)}\n failed with {runner_output}")
 
     return runner_output
-
-
-def call_vsharp_coverage_tool():
-    "/Users/emax/Data/VSharp/VSharp.TestRunner/bin/Release/net7.0/VSharp.TestRunner"
-
-def call_dotcover(path2test_runner_dll: str, tests_path: str, log_path: str):
-    dotcover_call = [
-        "dotnet",
-        "dotcover",
-        '--dcFilters="-:module=FSharp.*;-:class=VSharp.*;-:module=VSharp.Utils"',
-        path2test_runner_dll,
-        tests_path + "/VSharp.tests.0",
-        "--dcReportType=JSON",
-        "--dcDisableDefaultFilters",
-    ]
-    with open(log_path, "a+") as outfile:
-        subprocess.run(
-            " ".join(dotcover_call),
-            shell=True,
-            stdout=outfile,
-            stderr=subprocess.STDOUT,
-        )

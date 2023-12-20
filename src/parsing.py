@@ -72,17 +72,26 @@ def recurse_find(key: list[str], dotcover_out: dict) -> None | dict:
 
 
 def parse_runner_output(runner_output: str):
-    test_generated = re.search(
-        "Tests generated: (?P<count>\d+)", runner_output
-    ).groupdict()["count"]
-    errs_generated = re.search(
-        "Errors generated: (?P<count>\d+)", runner_output
-    ).groupdict()["count"]
-    steps_made = re.search("Steps: (?P<count>\d+)", runner_output).groupdict()["count"]
-    total_coverage = re.search(
-        "Total coverage: (?P<count>.*)", runner_output
-    ).groupdict()["count"]
-    total_coverage = float(total_coverage)
+    try:
+        test_generated = re.search(
+            "Tests generated: (?P<count>\d+)", runner_output
+        ).groupdict()["count"]
+        errs_generated = re.search(
+            "Errors generated: (?P<count>\d+)", runner_output
+        ).groupdict()["count"]
+        steps_made = re.search("Steps: (?P<count>\d+)", runner_output).groupdict()[
+            "count"
+        ]
+        if "Precise coverage" not in runner_output:
+            total_coverage = 0
+        else:
+            total_coverage = re.search(
+                "Precise coverage: (?P<count>.*)", runner_output
+            ).groupdict()["count"]
+        total_coverage = float(total_coverage)
+    except AttributeError as e:
+        e.add_note(f"Parse failed on output:\n{runner_output}")
+        raise
 
     return test_generated, errs_generated, steps_made, total_coverage
 

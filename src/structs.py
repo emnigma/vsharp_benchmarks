@@ -16,8 +16,7 @@ class RunResult:
     steps_made: int
     tests: int
     errors: int
-    runner_coverage_percent: float
-    dotcover_coverage_percent: float
+    precise_coverage_percent: float
 
 
 Method: t.TypeAlias = str
