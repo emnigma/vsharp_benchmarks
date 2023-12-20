@@ -29,7 +29,7 @@ def main():
     path2runner = (
         "/Users/emax/Data/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner"
     )
-    output_test_folder = "./gentests"
+    output_test_folder = "/Users/emax/Data/python/vsharp_searcher_bench/gentests"
     strategy_name = "ExecutionTreeContributedCoverage"
     default_steps_limit = 3000
 
@@ -95,6 +95,9 @@ def main():
                 )
             )
         )
+
+        with open(log_file_name, "a+") as outfile:
+            outfile.write("_" * 20 + "\n")
 
         df = pd.DataFrame(results)
         df.to_csv(f"{strategy_name}.csv", index=False)
