@@ -82,12 +82,9 @@ def parse_runner_output(runner_output: str):
         steps_made = re.search("Steps: (?P<count>\d+)", runner_output).groupdict()[
             "count"
         ]
-        if "Precise coverage" not in runner_output:
-            total_coverage = 0
-        else:
-            total_coverage = re.search(
-                "Precise coverage: (?P<count>.*)", runner_output
-            ).groupdict()["count"]
+        total_coverage = re.search(
+            "Precise coverage: (?P<count>.*)", runner_output
+        ).groupdict()["count"]
         total_coverage = float(total_coverage)
     except AttributeError as e:
         e.add_note(f"Parse failed on output:\n{runner_output}")

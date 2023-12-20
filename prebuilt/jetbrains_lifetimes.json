@@ -1,0 +1,63 @@
+{
+    "dll_dir": "/Users/emax/Data/VSharp/VSharp.ML.GameServer/bin/Release/net6.0/",
+    "dlls": {
+        "JetBrains.Lifetimes.dll": {
+            "Collections.CollectionEx": [
+                "ContentHashCode",
+                "TryDequeue",
+                "Enqueued"
+            ],
+            "Collections.CompactList`1": [
+                "Add",
+                "Clear",
+                "GetEnumerator",
+                "LastIndexOf",
+                "RemoveAt",
+                "ToArray"
+            ],
+            "Collections.CopyOnWriteList`1": [
+                "Add",
+                "Clear",
+                "Contains",
+                "CopyTo",
+                "GetEnumerator",
+                "IndexOf",
+                "Insert",
+                "Remove",
+                "RemoveAt"
+            ],
+            "Util.BitHacks": [
+                "Log2Floor",
+                "Log2Ceil",
+                "NumberOfBitSet"
+            ],
+            "Util.StaticsForType`1": [
+                "AddFirst",
+                "AddLast",
+                "ForEachValue",
+                "PeekFirst",
+                "PeekLast",
+                "RemoveLastReferenceEqual",
+                "ReplaceFirst"
+            ],
+            "Util.Statics": [
+                "For"
+            ],
+            "Util.LocalStopwatch": [
+                "StartNew",
+                "GetElapsedDateTimeTicks"
+            ],
+            "Util.Types": [
+                "OptionalTypeInfo",
+                "ToString"
+            ],
+            "Collections.Viewable.ReactiveEx": [
+                "AddLifetimed"
+            ],
+            "Collections.Viewable.SingleThreadScheduler": [
+                "CreateOverExisting",
+                "Queue"
+            ]
+        }
+    }
+}

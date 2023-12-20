@@ -26,12 +26,11 @@ Prepare:
 
 
 def main():
-    path2runner = (
-        "/Users/emax/Data/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner"
-    )
+    path2runer_wdir = "/Users/emax/Data/VSharp/VSharp.Runner/bin/Release/net7.0"
+    path2runner = path2runer_wdir + "/VSharp.Runner.dll"
     output_test_folder = "/Users/emax/Data/python/vsharp_searcher_bench/gentests"
     strategy_name = "ExecutionTreeContributedCoverage"
-    default_steps_limit = 3000
+    default_steps_limit = 30
 
     dll2methods = parse_maps("/Users/emax/Data/VSharp/VSharp.ML.GameServer/Maps.fs")
     gameserver_dataset = dll_prepend(
@@ -42,6 +41,7 @@ def main():
     timestamp = str(datetime.fromtimestamp(datetime.now().timestamp()))
     log_file_name = f"bench{timestamp}.log"
 
+    path2jetbrains_lifetimes_config = "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/jetbrains_lifetimes.json"
     path2cosmos_os_config = (
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/cosmos_tasks.json"
     )
@@ -52,6 +52,9 @@ def main():
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/unity_tasks.json"
     )
 
+    jetbrains_lifetimes = load_prebuilt_config(
+        path2jetbrains_lifetimes_config, default_steps_limit
+    )
     cosmos_os = load_prebuilt_config(path2cosmos_os_config, default_steps_limit)
     powershell = load_prebuilt_config(path2powershell_config, default_steps_limit)
     unity = load_prebuilt_config(path2_unity_config, default_steps_limit)
@@ -60,7 +63,9 @@ def main():
         shutil.rmtree(output_test_folder)
     os.makedirs(output_test_folder)
 
-    launch_infos = cosmos_os + powershell + unity + list(gameserver_dataset)
+    launch_infos = (
+        jetbrains_lifetimes + cosmos_os + powershell + unity + list(gameserver_dataset)
+    )
 
     results = []
 
@@ -72,6 +77,7 @@ def main():
             default_steps_limit=default_steps_limit,
             strat_name=strategy_name,
             tests_path=tests_path,
+            wdir=path2runer_wdir,
         )
 
         with open(log_file_name, "a+") as outfile:

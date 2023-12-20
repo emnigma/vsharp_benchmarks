@@ -9,8 +9,10 @@ def call_test_runner(
     default_steps_limit: int,
     strat_name: str,
     tests_path: str,
+    wdir: str,
 ):
     call = [
+        "dotnet",
         path_to_runner,
         "--method",
         launch_info.method,
@@ -28,9 +30,9 @@ def call_test_runner(
 
     print(" ".join(call))
 
-    runner_output = subprocess.check_output(call, stderr=subprocess.STDOUT).decode(
-        "utf-8"
-    )
+    runner_output = subprocess.check_output(
+        call, stderr=subprocess.STDOUT, cwd=wdir
+    ).decode("utf-8")
     if "Error:" in runner_output:
         raise RuntimeError(f"call {' '.join(call)}\n failed with {runner_output}")
 
