@@ -41,6 +41,9 @@ def main():
     timestamp = str(datetime.fromtimestamp(datetime.now().timestamp()))
     log_file_name = f"bench{timestamp}.log"
 
+    path2bizhawk_config = (
+        "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/bizhawk.json"
+    )
     path2jetbrains_lifetimes_config = "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/jetbrains_lifetimes.json"
     path2cosmos_os_config = (
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/cosmos_tasks.json"
@@ -52,6 +55,7 @@ def main():
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/unity_tasks.json"
     )
 
+    bizhawk = load_prebuilt_config(path2bizhawk_config, default_steps_limit)
     jetbrains_lifetimes = load_prebuilt_config(
         path2jetbrains_lifetimes_config, default_steps_limit
     )
@@ -64,7 +68,12 @@ def main():
     os.makedirs(output_test_folder)
 
     launch_infos = (
-        jetbrains_lifetimes + cosmos_os + powershell + unity + list(gameserver_dataset)
+        bizhawk
+        + jetbrains_lifetimes
+        + cosmos_os
+        + powershell
+        + unity
+        + list(gameserver_dataset)
     )
 
     results = []

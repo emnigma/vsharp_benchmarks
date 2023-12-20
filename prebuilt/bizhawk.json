@@ -1,0 +1,27 @@
+{
+    "dll_dir": "/Users/emax/Data/VSharp/BizHawk/output/dll/",
+    "dlls": {
+        "BizHawk.Common.dll": {
+            "BPSPayload": [
+                "DoPatch"
+            ],
+            "Common.BPSPatcher": [
+                "Patch"
+            ],
+            "Common.DeltaSerializer": [
+                "GetDelta"
+            ],
+            "Common.FFmpegService": [
+                "Run"
+            ],
+            "Common.Serializer": [
+                "SyncFixedString"
+            ]
+        },
+        "BizHawk.Client.Common.dll": {
+            "Client.Common.XmlGame": [
+                "Create"
+            ]
+        }
+    }
+}
