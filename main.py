@@ -30,7 +30,7 @@ def main():
     path2runner = path2runer_wdir + "/VSharp.Runner.dll"
     output_test_folder = "/Users/emax/Data/python/vsharp_searcher_bench/gentests"
     strategy_name = "ExecutionTreeContributedCoverage"
-    default_steps_limit = 30
+    default_steps_limit = 5000
 
     timestamp = str(datetime.fromtimestamp(datetime.now().timestamp()))
     log_file_name = f"bench{timestamp}.log"

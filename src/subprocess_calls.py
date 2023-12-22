@@ -28,8 +28,6 @@ def call_test_runner(
         "--check-coverage",
     ]
 
-    print(" ".join(call))
-
     runner_output = subprocess.check_output(
         call, stderr=subprocess.STDOUT, cwd=wdir
     ).decode("utf-8")
