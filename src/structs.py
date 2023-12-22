@@ -17,6 +17,7 @@ class RunResult:
     tests: int
     errors: int
     precise_coverage_percent: float
+    total_time_sec: int
     timeouted: bool
 
 

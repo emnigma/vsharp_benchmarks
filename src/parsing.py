@@ -73,6 +73,15 @@ def recurse_find(key: list[str], dotcover_out: dict) -> None | dict:
 
 def parse_runner_output(runner_output: str):
     try:
+        total_time = re.search(
+            r"Total time: (?P<hours>\d\d):(?P<minutes>\d\d):(?P<seconds>\d\d).\d\d\d",
+            runner_output,
+        ).groupdict()
+        total_time = (
+            int(total_time["hours"])
+            + int(total_time["minutes"])
+            + int(total_time["seconds"])
+        )
         test_generated = re.search(
             "Tests generated: (?P<count>\d+)", runner_output
         ).groupdict()["count"]
@@ -90,6 +99,7 @@ def parse_runner_output(runner_output: str):
         raise
 
     return (
+        total_time,
         int(test_generated),
         int(errs_generated),
         int(steps_made),

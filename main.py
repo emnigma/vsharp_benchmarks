@@ -88,6 +88,7 @@ def main():
             outfile.write(runner_output + "\n")
 
         (
+            total_time,
             test_generated,
             errs_generated,
             steps_made,
@@ -102,7 +103,8 @@ def main():
                     tests=test_generated,
                     errors=errs_generated,
                     precise_coverage_percent=runner_coverage,
-                    timeouted=steps_made < 5000 and runner_coverage < 100,
+                    total_time_sec=total_time,
+                    timeouted=total_time >= timeout_seconds,
                 )
             )
         )
