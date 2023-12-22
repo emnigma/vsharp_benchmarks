@@ -32,15 +32,12 @@ def main():
     strategy_name = "ExecutionTreeContributedCoverage"
     default_steps_limit = 30
 
-    dll2methods = parse_maps("/Users/emax/Data/VSharp/VSharp.ML.GameServer/Maps.fs")
-    gameserver_dataset = dll_prepend(
-        dll_dir="/Users/emax/Data/VSharp/VSharp.ML.GameMaps/bin/Debug/net7.0/",
-        dll2methods=dll2methods,
-    )
-
     timestamp = str(datetime.fromtimestamp(datetime.now().timestamp()))
     log_file_name = f"bench{timestamp}.log"
 
+    path2gamemaps_config = (
+        "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/game_maps.json"
+    )
     path2bizhawk_config = (
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/bizhawk.json"
     )
@@ -55,6 +52,7 @@ def main():
         "/Users/emax/Data/python/vsharp_searcher_bench/prebuilt/unity_tasks.json"
     )
 
+    gamemaps = load_prebuilt_config(path2gamemaps_config, default_steps_limit)
     bizhawk = load_prebuilt_config(path2bizhawk_config, default_steps_limit)
     jetbrains_lifetimes = load_prebuilt_config(
         path2jetbrains_lifetimes_config, default_steps_limit
@@ -68,12 +66,7 @@ def main():
     os.makedirs(output_test_folder)
 
     launch_infos = (
-        bizhawk
-        + jetbrains_lifetimes
-        + cosmos_os
-        + powershell
-        + unity
-        + list(gameserver_dataset)
+        gamemaps + bizhawk + jetbrains_lifetimes + cosmos_os + powershell + unity
     )
 
     results = []

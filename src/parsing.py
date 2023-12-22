@@ -98,11 +98,15 @@ def parse_prebuilt(config: PrebuiltConfig, steps_limit: int):
 
     for dll, class2methods in config.dlls.items():
         for clazz, methods in class2methods.items():
-            for method in methods:
+            for method_info in methods:
+                if isinstance(method_info, list):
+                    method, steps_limit = method_info
+                else:
+                    method = method_info
                 launch_info.append(
                     LaunchInfo(
                         dll=os.path.join(config.dll_dir, dll),
-                        method=".".join([clazz, method]),
+                        method=method if clazz == "" else ".".join([clazz, method]),
                         steps=steps_limit,
                     )
                 )
