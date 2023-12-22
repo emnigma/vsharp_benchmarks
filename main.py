@@ -31,6 +31,7 @@ def main():
     output_test_folder = "/Users/emax/Data/python/vsharp_searcher_bench/gentests"
     strategy_name = "ExecutionTreeContributedCoverage"
     default_steps_limit = 5000
+    timeout_seconds = 300
 
     timestamp = str(datetime.fromtimestamp(datetime.now().timestamp()))
     log_file_name = f"bench{timestamp}.log"
@@ -80,6 +81,7 @@ def main():
             strat_name=strategy_name,
             tests_path=tests_path,
             wdir=path2runer_wdir,
+            timeout=timeout_seconds,
         )
 
         with open(log_file_name, "a+") as outfile:
@@ -100,6 +102,7 @@ def main():
                     tests=test_generated,
                     errors=errs_generated,
                     precise_coverage_percent=runner_coverage,
+                    timeouted=steps_made < 5000 and runner_coverage < 100,
                 )
             )
         )

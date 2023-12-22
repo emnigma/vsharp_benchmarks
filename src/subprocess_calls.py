@@ -10,6 +10,7 @@ def call_test_runner(
     strat_name: str,
     tests_path: str,
     wdir: str,
+    timeout: int,
 ):
     call = [
         "dotnet",
@@ -18,7 +19,7 @@ def call_test_runner(
         launch_info.method,
         launch_info.dll,
         "--timeout",
-        str(300),
+        str(timeout),
         "--steps-limit",
         str(launch_info.steps) if launch_info.steps else str(default_steps_limit),
         "--strat",

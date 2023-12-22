@@ -85,12 +85,16 @@ def parse_runner_output(runner_output: str):
         total_coverage = re.search(
             "Precise coverage: (?P<count>.*)", runner_output
         ).groupdict()["count"]
-        total_coverage = float(total_coverage)
     except AttributeError as e:
         e.add_note(f"Parse failed on output:\n{runner_output}")
         raise
 
-    return test_generated, errs_generated, steps_made, total_coverage
+    return (
+        int(test_generated),
+        int(errs_generated),
+        int(steps_made),
+        float(total_coverage),
+    )
 
 
 def parse_prebuilt(config: PrebuiltConfig, steps_limit: int):
