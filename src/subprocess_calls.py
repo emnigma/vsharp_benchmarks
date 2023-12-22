@@ -18,7 +18,7 @@ def call_test_runner(
         launch_info.method,
         launch_info.dll,
         "--timeout",
-        str(-1),
+        str(300),
         "--steps-limit",
         str(launch_info.steps) if launch_info.steps else str(default_steps_limit),
         "--strat",
