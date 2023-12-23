@@ -45,7 +45,7 @@ def dll_prepend(
     dll_dir: str, dll2methods: t.Iterable[LaunchInfo]
 ) -> t.Iterable[LaunchInfo]:
     def prepend2first(entry: LaunchInfo):
-        return LaunchInfo(dll_dir + entry.dll, entry.method, entry.steps)
+        return LaunchInfo(os.path.join(dll_dir, entry.dll), entry.method, entry.steps)
 
     return map(prepend2first, dll2methods)
 
@@ -74,7 +74,7 @@ def recurse_find(key: list[str], dotcover_out: dict) -> None | dict:
 def parse_runner_output(runner_output: str):
     try:
         total_time = re.search(
-            r"Total time: (?P<hours>\d\d):(?P<minutes>\d\d):(?P<seconds>\d\d).\d\d\d",
+            r"Total time: (?P<hours>\d\d):(?P<minutes>\d\d):(?P<seconds>\d\d)\.*",
             runner_output,
         ).groupdict()
         total_time = (

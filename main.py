@@ -6,12 +6,7 @@ import attrs
 import pandas as pd
 import tqdm
 
-from src.parsing import (
-    dll_prepend,
-    load_prebuilt_config,
-    parse_maps,
-    parse_runner_output,
-)
+from src.parsing import load_prebuilt_config, parse_runner_output
 from src.structs import RunResult
 from src.subprocess_calls import call_test_runner
 

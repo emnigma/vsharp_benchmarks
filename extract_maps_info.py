@@ -20,7 +20,7 @@ def main():
 
     dll2methods = parse_maps(args.maps_file)
     gameserver_dataset = dll_prepend(
-        dll_dir="/Users/emax/Data/VSharp/VSharp.ML.GameMaps/bin/Debug/net7.0/",
+        dll_dir=args.dll_dir,
         dll2methods=dll2methods,
     )
 
