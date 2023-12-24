@@ -13,10 +13,10 @@ class LaunchInfo:
 @attrs.define(frozen=True, slots=True)
 class RunResult:
     method: str
-    steps_made: int
+    steps: int
     tests: int
     errors: int
-    precise_coverage_percent: float
+    coverage: float
     total_time_sec: int
     timeouted: bool
 

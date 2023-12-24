@@ -33,26 +33,11 @@
                 "BinaryMaze2Main",
                 "IslandsMain",
                 "MatrixQueryMain",
-                [
-                    "LoanExamBuild",
-                    5000
-                ],
-                [
-                    "multiply_matrix",
-                    5000
-                ],
-                [
-                    "adjoint",
-                    5000
-                ],
-                [
-                    "bridge",
-                    1000
-                ],
-                [
-                    "PrimeFactorCount",
-                    1000
-                ]
+                "LoanExamBuild",
+                "multiply_matrix",
+                "adjoint",
+                "bridge",
+                "PrimeFactorCount"
             ]
         },
         "/Users/emax/Data/VSharp/VSharp.ML.GameMaps/bin/Debug/net7.0/Advanced.Algorithms.dll": {
@@ -68,14 +53,8 @@
                 "FindPermutationRecurse",
                 "FindSubsetRecurse",
                 "CalcBase10LogFloor",
-                [
-                    "bucketSort",
-                    5000
-                ],
-                [
-                    "GetMaxBiPartiteMatchingMain",
-                    5000
-                ]
+                "bucketSort",
+                "GetMaxBiPartiteMatchingMain"
             ],
             "SuffixTree`1": [
                 "Insert",
@@ -110,20 +89,11 @@
                 "TryPeek"
             ],
             "ReactiveEx": [
-                [
-                    "AdviseUntil",
-                    5000
-                ],
-                [
-                    "AdviseOnce",
-                    5000
-                ]
+                "AdviseUntil",
+                "AdviseOnce"
             ],
             "Types": [
-                [
-                    "ToString",
-                    5000
-                ]
+                "ToString"
             ]
         },
         "/Users/emax/Data/VSharp/VSharp.ML.GameMaps/bin/Debug/net7.0/Algorithms.dll": {

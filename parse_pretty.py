@@ -22,7 +22,7 @@ def parse_stats(stats: str) -> tuple[int, int, int, float]:
     tests = re.search("test count: (?P<count>.\d*) ", stats).groupdict()["count"]
     errors = re.search("error count: (?P<count>.\d*)", stats).groupdict()["count"]
 
-    return (steps, tests, errors, coverage)
+    return (int(steps), int(tests), int(errors), float(coverage))
 
 
 def parse_pretty(data: list[str]) -> pd.DataFrame:

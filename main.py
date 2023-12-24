@@ -94,10 +94,10 @@ def main():
             attrs.asdict(
                 RunResult(
                     method=launch_info.method,
-                    steps_made=steps_made,
+                    steps=steps_made,
                     tests=test_generated,
                     errors=errs_generated,
-                    precise_coverage_percent=runner_coverage,
+                    coverage=runner_coverage,
                     total_time_sec=total_time,
                     timeouted=total_time >= timeout_seconds,
                 )
