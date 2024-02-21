@@ -1,16 +1,17 @@
 import subprocess
 
+import func_timeout
+
 from src.structs import LaunchInfo
 
 
 def call_test_runner(
     path_to_runner: str,
     launch_info: LaunchInfo,
-    default_steps_limit: int,
     strat_name: str,
-    tests_path: str,
     wdir: str,
     timeout: int,
+    model_path: str,
 ):
     call = [
         "dotnet",
@@ -20,19 +21,26 @@ def call_test_runner(
         launch_info.dll,
         "--timeout",
         str(timeout),
-        "--steps-limit",
-        str(launch_info.steps) if launch_info.steps else str(default_steps_limit),
         "--strat",
         strat_name,
-        "--output",
-        tests_path,
         "--check-coverage",
+        "--model",
+        model_path,
     ]
 
-    runner_output = subprocess.check_output(
-        call, stderr=subprocess.STDOUT, cwd=wdir
-    ).decode("utf-8")
-    if "Error:" in runner_output:
-        raise RuntimeError(f"call {' '.join(call)}\n failed with {runner_output}")
+    def runner_fun(call, wdir):
+        return subprocess.check_output(call, stderr=subprocess.STDOUT, cwd=wdir).decode(
+            "utf-8"
+        )
 
-    return runner_output
+    try:
+        runner_output = func_timeout.func_timeout(
+            timeout=timeout + 1, func=runner_fun, kwargs={"call": call, "wdir": wdir}
+        )
+
+    except subprocess.CalledProcessError:
+        raise
+    except func_timeout.FunctionTimedOut:
+        raise
+
+    return " ".join(map(str, call)), runner_output

@@ -3,9 +3,10 @@ __pycache__
 *.log
 prebuilt/*
 !prebuilt/*.json
+!prebuilt/*.csv
 gentests
 
 dotCover.Output.*
-*.csv
+/**/*.csv
 
 .DS_Store

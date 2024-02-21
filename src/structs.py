@@ -7,18 +7,15 @@ import attrs
 class LaunchInfo:
     dll: str
     method: str
-    steps: t.Optional[int] = None
 
 
 @attrs.define(frozen=True, slots=True)
 class RunResult:
     method: str
-    steps: int
     tests: int
     errors: int
     coverage: float
     total_time_sec: int
-    timeouted: bool
 
 
 Method: t.TypeAlias = str
