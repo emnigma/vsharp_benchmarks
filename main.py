@@ -17,9 +17,6 @@ from src.subprocess_calls import call_test_runner
 timestamp = datetime.fromtimestamp(datetime.now().timestamp())
 
 
-PYSYMGYM_ROOT = pathlib.Path("...")
-
-
 def setup_logging(strategy):
     logging.basicConfig(
         filename=f"{strategy}_{timestamp}.log",
@@ -37,33 +34,13 @@ def main():
         "-t", "--timeout", type=int, required=True, help="V# runner timeout"
     )
     parser.add_argument(
-        "--root-project-path",
+        "-ps",
+        "--pysymgym-path",
         type=pathlib.Path,
-        dest="root_project_path",
-        default=pathlib.Path(
-            PYSYMGYM_ROOT / "maps/DotNet/Maps/Root/bin/Release/net7.0"
-        ).absolute(),
-        help="Absolute path to VSharp",
+        dest="pysymgym_path",
+        help="Absolute path to PySymGym",
     )
-    parser.add_argument(
-        "--runner-path",
-        type=pathlib.Path,
-        dest="runner_path",
-        default=pathlib.Path(
-            PYSYMGYM_ROOT
-            / "GameServers/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner.dll"
-        ).absolute(),
-        help="Absolute path to VSharp.Runner.dll",
-    )
-    parser.add_argument(
-        "--model-path",
-        type=pathlib.Path,
-        dest="model_path",
-        default=pathlib.Path(
-            PYSYMGYM_ROOT / "GameServers/VSharp/VSharp.Explorer/models/model.onnx"
-        ).absolute(),
-        help="Absolute path to model.onnx",
-    )
+
     parser.add_argument(
         "-as",
         "--assembly-infos",
@@ -76,6 +53,14 @@ def main():
     )
 
     args = parser.parse_args()
+
+    runner_path = pathlib.Path(
+        args.pysymgym_path
+        / "GameServers/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner.dll"
+    ).absolute()
+    model_path = pathlib.Path(
+        args.pysymgym_path / "GameServers/VSharp/VSharp.Explorer/models/model.onnx"
+    ).absolute()
 
     setup_logging(strategy=args.strategy)
 
@@ -94,12 +79,12 @@ def main():
     for launch_info in tqdm.tqdm(assembled, desc=args.strategy):
         try:
             call, runner_output = call_test_runner(
-                path_to_runner=args.runner_path,
+                path_to_runner=runner_path,
                 launch_info=launch_info,
                 strat_name=args.strategy,
-                wdir=args.runner_path.parent,
+                wdir=runner_path.parent,
                 timeout=args.timeout,
-                model_path=args.model_path,
+                model_path=model_path,
             )
         except subprocess.CalledProcessError as cpe:
             logging.error(
