@@ -67,7 +67,10 @@ def main():
     assembled = list(
         itertools.chain(
             *[
-                load_config(dll_path, launch_info)
+                load_config(
+                    pathlib.Path(dll_path).absolute(),
+                    pathlib.Path(launch_info).absolute(),
+                )
                 for dll_path, launch_info in args.assembly_infos
             ]
         )
