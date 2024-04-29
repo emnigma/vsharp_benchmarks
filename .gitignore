@@ -8,5 +8,9 @@ gentests
 
 dotCover.Output.*
 /**/*.csv
+!mock_runs/*.csv
 
 .DS_Store
+
+.*env/
+.vscode/
