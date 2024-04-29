@@ -1,149 +1,144 @@
-import matplotlib.pyplot as plt
+import argparse
+import itertools
+import logging
+import pathlib
+import subprocess
+from datetime import datetime
+
+import attrs
+import func_timeout
 import pandas as pd
+import tqdm
+
+from src.parsing import load_config, parse_runner_output
+from src.structs import RunResult
+from src.subprocess_calls import call_test_runner
+
+timestamp = datetime.fromtimestamp(datetime.now().timestamp())
 
 
-# searchstratcomp --(s)trategies --(p)arsedir
+def setup_logging(strategy):
+    logging.basicConfig(
+        filename=f"{strategy}_{timestamp}.log",
+        format="%(asctime)s - p%(process)d: %(name)s - [%(levelname)s]: %(message)s",
+        level=logging.INFO,
+    )
 
 
-nn_res_path = "AI_all_new.csv"
-heuristic_res_path = "ExecutionTreeContributedCoverage_all.csv"
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--strategy", type=str, required=True, help="V# searcher strategy"
+    )
+    parser.add_argument(
+        "-t", "--timeout", type=int, required=True, help="V# runner timeout"
+    )
+    parser.add_argument(
+        "-ps",
+        "--pysymgym-path",
+        type=pathlib.Path,
+        dest="pysymgym_path",
+        help="Absolute path to PySymGym",
+    )
 
-nn_df = pd.read_csv(nn_res_path)
-heu_df = pd.read_csv(heuristic_res_path)
+    parser.add_argument(
+        "-as",
+        "--assembly-infos",
+        type=pathlib.Path,
+        dest="assembly_infos",
+        action="append",
+        nargs=2,
+        metavar=("dlls-path", "launch-info-path"),
+        help="Provide tuples: dir with dlls/assembly info file",
+    )
 
-set(pd.read_csv(nn_res_path)["method"]).symmetric_difference(
-    set(pd.read_csv(heuristic_res_path)["method"])
-)
+    args = parser.parse_args()
+
+    runner_path = pathlib.Path(
+        args.pysymgym_path
+        / "GameServers/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner.dll"
+    ).absolute()
+    model_path = pathlib.Path(
+        args.pysymgym_path / "GameServers/VSharp/VSharp.Explorer/models/model.onnx"
+    ).absolute()
+
+    setup_logging(strategy=args.strategy)
+
+    assembled = list(
+        itertools.chain(
+            *[
+                load_config(
+                    pathlib.Path(dll_path).absolute(),
+                    pathlib.Path(launch_info).absolute(),
+                )
+                for dll_path, launch_info in args.assembly_infos
+            ]
+        )
+    )
+
+    logging.info(args)
+    results = []
+
+    for launch_info in tqdm.tqdm(assembled, desc=args.strategy):
+        try:
+            call, runner_output = call_test_runner(
+                path_to_runner=runner_path,
+                launch_info=launch_info,
+                strat_name=args.strategy,
+                wdir=runner_path.parent,
+                timeout=args.timeout,
+                model_path=model_path,
+            )
+        except subprocess.CalledProcessError as cpe:
+            logging.error(
+                f"""
+                runner threw {cpe} on {launch_info.method}, this method will be skipped
+                runner output: {cpe.output}
+                cmd: {cpe.cmd}
+                """
+            )
+            continue
+        except func_timeout.FunctionTimedOut as fto:
+            logging.error(
+                f"""
+                runner timed out on {launch_info.method}, this method will be skipped
+                cmd: {" ".join(map(str,fto.timedOutKwargs["call"]))}
+                """
+            )
+            continue
+
+        try:
+            (
+                total_time,
+                test_generated,
+                errs_generated,
+                runner_coverage,
+            ) = parse_runner_output(runner_output)
+        except AttributeError as e:
+            logging.error(
+                f"""
+                {e} thrown on {launch_info.method}, this method will be skipped
+                runner output: {runner_output}
+                cmd: {call}
+                """
+            )
+            continue
+
+        run_result = RunResult(
+            method=launch_info.method,
+            tests=test_generated,
+            errors=errs_generated,
+            coverage=runner_coverage,
+            total_time_sec=total_time,
+        )
+
+        logging.info(f"method {launch_info.method} completed with {run_result}")
+
+        results.append(attrs.asdict(run_result))
+
+        df = pd.DataFrame(results)
+        df.to_csv(f"{args.strategy}_{timestamp}.csv", index=False)
 
 
-def drop_failed(df: pd.DataFrame) -> int:
-    failed = df[(df["coverage"] == -1)].index
-    return failed
-
-
-heu_df = heu_df.drop(drop_failed(heu_df))
-nn_df = nn_df.drop(drop_failed(nn_df))
-
-inner_df = heu_df.merge(nn_df, on="method", how="inner", suffixes=("ETCC", "AI"))
-
-root = "report"
-
-open(root + "/data.txt", "w").close()
-with open(root + "/data.txt", "a") as file:
-    file.write(",len(AI_more), len(VSharp_more), len(eq)\n")
-
-
-def compare(
-    dataframe: pd.DataFrame,
-    on: str,
-    desc: str,
-    metric: str,
-    divider_line: bool = False,
-    less_is_winning: bool = False,
-    logscale: bool = False,
-    exp_name: str = None,
-):
-    AI_more = dataframe.loc[dataframe[f"{on}ETCC"] < dataframe[f"{on}AI"]]
-    VSharp_more = dataframe.loc[dataframe[f"{on}ETCC"] > dataframe[f"{on}AI"]]
-    eq = dataframe.loc[dataframe[f"{on}ETCC"] == dataframe[f"{on}AI"]]
-
-    len(AI_more)
-    len(VSharp_more)
-    len(eq)
-    print(exp_name)
-    print(f"{len(AI_more)=}, {len(VSharp_more)=}, {len(eq)=}")
-
-    if logscale:
-        plt.xscale("log")
-        plt.yscale("log")
-        desc += ", logscale"
-
-    if divider_line:
-        plt.axline([0, 0], [1, 1])
-
-    colors = ["green", "red", "black"]
-    if less_is_winning:
-        colors = ["red", "green", "black"]
-
-    with open(root + "/data.txt", "a") as file:
-        file.write(exp_name + ",")
-        file.write(f"{len(AI_more)}, {len(VSharp_more)}, {len(eq)}\n")
-
-    plt.scatter(AI_more[f"{on}ETCC"], AI_more[f"{on}AI"], color=colors[0])
-    plt.scatter(VSharp_more[f"{on}ETCC"], VSharp_more[f"{on}AI"], color=colors[1])
-    plt.scatter(eq[f"{on}ETCC"], eq[f"{on}AI"], color=colors[2])
-    plt.xlabel(f"ETCC {on}, {metric}\n\n{on} comparison on the same methods\n{desc}")
-    plt.ylabel(f"AI {on}, {metric}")
-    savename = f"{on}.pdf" if exp_name is None else f"{exp_name}.pdf"
-    plt.savefig(root + "/" + savename, format="pdf", bbox_inches="tight")
-    # plt.show()
-
-
-compare(
-    dataframe=inner_df,
-    on="coverage",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="%",
-    divider_line=True,
-    exp_name="coverage",
-)
-compare(
-    dataframe=inner_df,
-    on="tests",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="count",
-    divider_line=True,
-    less_is_winning=True,
-    logscale=True,
-    exp_name="tests",
-)
-compare(
-    dataframe=inner_df,
-    on="errors",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="count",
-    divider_line=True,
-    logscale=True,
-    exp_name="errors",
-)
-compare(
-    dataframe=inner_df,
-    on="total_time_sec",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="s",
-    divider_line=True,
-    less_is_winning=True,
-    exp_name="total_time_secs",
-)
-
-inner_coverage_eq = inner_df.loc[inner_df["coverageAI"] == inner_df["coverageETCC"]]
-
-compare(
-    dataframe=inner_coverage_eq,
-    on="tests",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="count",
-    divider_line=True,
-    less_is_winning=True,
-    logscale=True,
-    exp_name="tests_eq_coverage",
-)
-compare(
-    dataframe=inner_coverage_eq,
-    on="errors",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="count",
-    divider_line=True,
-    logscale=True,
-    exp_name="errors_eq_coverage",
-)
-compare(
-    dataframe=inner_coverage_eq,
-    on="total_time_sec",
-    desc="red: ETCC win, green: AI win, black: equal",
-    metric="s",
-    divider_line=True,
-    less_is_winning=True,
-    logscale=True,
-    exp_name="total_time_eq_coverage",
-)
+if __name__ == "__main__":
+    main()
