@@ -74,6 +74,9 @@ To compare two results run:
 
 ```bash 
 python3 compstrat.py \
-    -s1 AI -r1 AI_all_new.csv \
-    -s2 ETCC -r2 ExecutionTreeContributedCoverage_all.csv
+    -s1 ALHPA -r1 mock_runs/strat_alpha.csv \
+    -s2 BETA -r2 mock_runs/strat_beta.csv
 ```
+
+Output example:
+![resources/alpha_beta_comp_vis_example.png](resources/alpha_beta_comp_vis_example.png)
