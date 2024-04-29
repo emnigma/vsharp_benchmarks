@@ -16,12 +16,14 @@ class Args:
 
 
 def entrypoint(args: Args):
-    df1 = pd.read_csv(args.run1)
-    df2 = pd.read_csv(args.run2)
+    def create(strat, run, color):
+        return Strategy(strat, pd.read_csv(run), color)
 
+    philippine_orange = Color(255, 115, 0, "orange")
+    blue_sparkle = Color(0, 119, 255, "blue")
     comparator = Comparator(
-        Strategy(args.strat1, df1, Color(255, 115, 0, "philippine_orange")),
-        Strategy(args.strat2, df2, Color(0, 119, 255, "blue_sparkle")),
+        create(args.strat1, args.run1, philippine_orange),
+        create(args.strat2, args.run2, blue_sparkle),
         saveroot="report",
     )
     comparator.compare(COMPARE_CONFS)

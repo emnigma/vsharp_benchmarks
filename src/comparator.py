@@ -20,6 +20,16 @@ class Color:
     def to_rgb(self):
         return (self.r / 255, self.g / 255, self.b / 255)
 
+    @staticmethod
+    def from_hex(hex_str: str):
+        hex_str = hex_str.lstrip("#")
+        return Color(
+            r=int(hex_str[0:2], 16),
+            g=int(hex_str[2:4], 16),
+            b=int(hex_str[4:6], 16),
+            name=hex_str,
+        )
+
 
 @attrs.define
 class Strategy:
@@ -46,7 +56,13 @@ class CompareConfig:
 
 
 class Comparator:
-    def __init__(self, strat1: Strategy, strat2: Strategy, saveroot: str) -> None:
+    def __init__(
+        self,
+        strat1: Strategy,
+        strat2: Strategy,
+        saveroot: str,
+        eq_color: Color = Color(0, 0, 0, "black"),
+    ) -> None:
         os.makedirs(saveroot, exist_ok=True)
         self.saveroot = saveroot
         self.strat1 = strat1
@@ -54,6 +70,7 @@ class Comparator:
         self.result_count_df = pd.DataFrame(
             columns=[f"{strat1.name}_won", f"{strat2.name}_won", "eq"]
         )
+        self.eq_color = eq_color
 
         with open(os.path.join(self.saveroot, "symdiff_starts_methods.json"), "w") as f:
             json.dump(
@@ -142,7 +159,6 @@ class Comparator:
             strat1_win[f"{config.by_column}{self.strat1.name}"],
             color=[self.strat1.color.to_rgb()],
         )
-
         plt.scatter(
             strat2_win[f"{config.by_column}{self.strat2.name}"],
             strat2_win[f"{config.by_column}{self.strat1.name}"],
@@ -151,13 +167,13 @@ class Comparator:
         plt.scatter(
             eq[f"{config.by_column}{self.strat2.name}"],
             eq[f"{config.by_column}{self.strat1.name}"],
-            color="black",
+            color=self.eq_color.to_rgb(),
         )
         plt.xlabel(
             f"{self.strat2.name} {config.by_column}, {config.metric}\n\n"
             f"{config.by_column} comparison on the same methods, {scale}\n"
             f"{self.strat1.name} ({self.strat1.color.name}) won: {len(strat1_win)}, "
-            f"{self.strat2.name} ({self.strat2.color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
+            f"{self.strat2.name} ({self.strat2.color.name}) won: {len(strat2_win)}, eq ({self.eq_color.name}): {len(eq)}"
         )
         plt.ylabel(f"{self.strat1.name} {config.by_column}, {config.metric}")
         savename = (
