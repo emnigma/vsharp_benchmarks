@@ -102,22 +102,23 @@ class Comparator:
 
         strat1_win = dataframe.loc[
             left_win_comparison(
-                dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
                 dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
+                dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
             )
         ]
         strat2_win = dataframe.loc[
             left_win_comparison(
-                dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
                 dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
+                dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
             )
         ]
         eq = dataframe.loc[
-            dataframe[f"{config.by_column}{self.strat2.strategy_name}"]
-            == dataframe[f"{config.by_column}{self.strat1.strategy_name}"]
+            dataframe[f"{config.by_column}{self.strat1.strategy_name}"]
+            == dataframe[f"{config.by_column}{self.strat2.strategy_name}"]
         ]
 
-        print(f"{len(strat1_win)=}, {len(strat2_win)=}, {len(eq)=}")
+        print(self.strat1.strategy_name, self.strat2.strategy_name)
+        print(f"{config.exp_name} {len(strat1_win)=}, {len(strat2_win)=}, {len(eq)=}")
 
         scale = "linscale"
         if config.logscale:
@@ -155,7 +156,8 @@ class Comparator:
             color="black",
         )
         plt.xlabel(
-            f"{self.strat2.strategy_name} {config.by_column}, {config.metric}\n\n{config.by_column} comparison on the same methods, {scale}\n"
+            f"{self.strat2.strategy_name} {config.by_column}, {config.metric}\n\n"
+            f"{config.by_column} comparison on the same methods, {scale}\n"
             f"{self.strat1.strategy_name} ({self.strat1.color.name}) won: {len(strat1_win)}, "
             f"{self.strat2.strategy_name} ({self.strat2.color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
         )

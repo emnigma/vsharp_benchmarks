@@ -1,4 +1,4 @@
-from comparator import CompareConfig, DataSourceType
+from src.comparator import CompareConfig, DataSourceType
 
 COMPARE_CONFS = [
     CompareConfig(
@@ -6,6 +6,7 @@ COMPARE_CONFS = [
         by_column="coverage",
         metric="%",
         divider_line=True,
+        less_is_winning=False,
         exp_name="coverage",
     ),
     CompareConfig(
@@ -22,6 +23,7 @@ COMPARE_CONFS = [
         by_column="errors",
         metric="count",
         divider_line=True,
+        less_is_winning=False,
         logscale=True,
         exp_name="errors",
     ),
