@@ -6,6 +6,7 @@ import warnings
 import attrs
 import matplotlib.pyplot as plt
 import pandas as pd
+import tqdm
 
 
 @attrs.define
@@ -19,11 +20,21 @@ class Color:
     def to_rgb(self):
         return (self.r / 255, self.g / 255, self.b / 255)
 
+    @staticmethod
+    def from_hex(hex_str: str):
+        hex_str = hex_str.lstrip("#")
+        return Color(
+            r=int(hex_str[0:2], 16),
+            g=int(hex_str[2:4], 16),
+            b=int(hex_str[4:6], 16),
+            name=hex_str,
+        )
+
 
 @attrs.define
 class Strategy:
-    strategy_name: str
-    strategy_df: pd.DataFrame
+    name: str
+    df: pd.DataFrame
     color: Color
 
 
@@ -45,20 +56,27 @@ class CompareConfig:
 
 
 class Comparator:
-    def __init__(self, strat1: Strategy, strat2: Strategy, saveroot: str) -> None:
+    def __init__(
+        self,
+        strat1: Strategy,
+        strat2: Strategy,
+        saveroot: str,
+        eq_color: Color = Color(0, 0, 0, "black"),
+    ) -> None:
         os.makedirs(saveroot, exist_ok=True)
         self.saveroot = saveroot
         self.strat1 = strat1
         self.strat2 = strat2
         self.result_count_df = pd.DataFrame(
-            columns=[f"{strat1.strategy_name}_won", f"{strat2.strategy_name}_won", "eq"]
+            columns=[f"{strat1.name}_won", f"{strat2.name}_won", "eq"]
         )
+        self.eq_color = eq_color
 
         with open(os.path.join(self.saveroot, "symdiff_starts_methods.json"), "w") as f:
             json.dump(
                 list(
-                    set(strat1.strategy_df["method"]).symmetric_difference(
-                        set(strat2.strategy_df["method"])
+                    set(strat1.df["method"]).symmetric_difference(
+                        set(strat2.df["method"])
                     )
                 ),
                 f,
@@ -66,16 +84,16 @@ class Comparator:
             )
         self.drop_failed()
 
-        self.inner_df = self.strat1.strategy_df.merge(
-            self.strat2.strategy_df,
+        self.inner_df = self.strat1.df.merge(
+            self.strat2.df,
             on="method",
             how="inner",
-            suffixes=(self.strat1.strategy_name, self.strat2.strategy_name),
+            suffixes=(self.strat1.name, self.strat2.name),
         )
 
         self.inner_coverage_eq = self.inner_df.loc[
-            self.inner_df[f"coverage{self.strat1.strategy_name}"]
-            == self.inner_df[f"coverage{self.strat2.strategy_name}"]
+            self.inner_df[f"coverage{self.strat1.name}"]
+            == self.inner_df[f"coverage{self.strat2.name}"]
         ]
 
     def _drop_failed(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -83,8 +101,8 @@ class Comparator:
         return df.drop(failed)
 
     def drop_failed(self) -> int:
-        self.strat1.strategy_df = self._drop_failed(self.strat1.strategy_df)
-        self.strat2.strategy_df = self._drop_failed(self.strat2.strategy_df)
+        self.strat1.df = self._drop_failed(self.strat1.df)
+        self.strat2.df = self._drop_failed(self.strat2.df)
 
     def _compare(self, config: CompareConfig):
         def left_win_comparison(left, right):
@@ -102,23 +120,20 @@ class Comparator:
 
         strat1_win = dataframe.loc[
             left_win_comparison(
-                dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
-                dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
+                dataframe[f"{config.by_column}{self.strat1.name}"],
+                dataframe[f"{config.by_column}{self.strat2.name}"],
             )
         ]
         strat2_win = dataframe.loc[
             left_win_comparison(
-                dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
-                dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
+                dataframe[f"{config.by_column}{self.strat2.name}"],
+                dataframe[f"{config.by_column}{self.strat1.name}"],
             )
         ]
         eq = dataframe.loc[
-            dataframe[f"{config.by_column}{self.strat1.strategy_name}"]
-            == dataframe[f"{config.by_column}{self.strat2.strategy_name}"]
+            dataframe[f"{config.by_column}{self.strat1.name}"]
+            == dataframe[f"{config.by_column}{self.strat2.name}"]
         ]
-
-        print(self.strat1.strategy_name, self.strat2.strategy_name)
-        print(f"{config.exp_name} {len(strat1_win)=}, {len(strat2_win)=}, {len(eq)=}")
 
         scale = "linscale"
         if config.logscale:
@@ -140,28 +155,27 @@ class Comparator:
         ]
 
         plt.scatter(
-            strat1_win[f"{config.by_column}{self.strat2.strategy_name}"],
-            strat1_win[f"{config.by_column}{self.strat1.strategy_name}"],
+            strat1_win[f"{config.by_column}{self.strat2.name}"],
+            strat1_win[f"{config.by_column}{self.strat1.name}"],
             color=[self.strat1.color.to_rgb()],
         )
-
         plt.scatter(
-            strat2_win[f"{config.by_column}{self.strat2.strategy_name}"],
-            strat2_win[f"{config.by_column}{self.strat1.strategy_name}"],
+            strat2_win[f"{config.by_column}{self.strat2.name}"],
+            strat2_win[f"{config.by_column}{self.strat1.name}"],
             color=[self.strat2.color.to_rgb()],
         )
         plt.scatter(
-            eq[f"{config.by_column}{self.strat2.strategy_name}"],
-            eq[f"{config.by_column}{self.strat1.strategy_name}"],
-            color="black",
+            eq[f"{config.by_column}{self.strat2.name}"],
+            eq[f"{config.by_column}{self.strat1.name}"],
+            color=self.eq_color.to_rgb(),
         )
         plt.xlabel(
-            f"{self.strat2.strategy_name} {config.by_column}, {config.metric}\n\n"
+            f"{self.strat2.name} {config.by_column}, {config.metric}\n\n"
             f"{config.by_column} comparison on the same methods, {scale}\n"
-            f"{self.strat1.strategy_name} ({self.strat1.color.name}) won: {len(strat1_win)}, "
-            f"{self.strat2.strategy_name} ({self.strat2.color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
+            f"{self.strat1.name} ({self.strat1.color.name}) won: {len(strat1_win)}, "
+            f"{self.strat2.name} ({self.strat2.color.name}) won: {len(strat2_win)}, eq ({self.eq_color.name}): {len(eq)}"
         )
-        plt.ylabel(f"{self.strat1.strategy_name} {config.by_column}, {config.metric}")
+        plt.ylabel(f"{self.strat1.name} {config.by_column}, {config.metric}")
         savename = (
             f"{config.on}.pdf" if config.exp_name is None else f"{config.exp_name}.pdf"
         )
@@ -170,7 +184,9 @@ class Comparator:
         )
 
     def compare(self, configs: list[CompareConfig]):
-        for config in configs:
+        for config in tqdm.tqdm(
+            configs, desc=f"{self.strat1.name} vs {self.strat2.name}"
+        ):
             self._compare(config)
 
         self.result_count_df.to_csv(os.path.join(self.saveroot, "result_count.csv"))
