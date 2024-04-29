@@ -153,9 +153,7 @@ def main():
 
     args = parser.parse_args()
 
-    entrypoint(
-        Args(args.strategy, args.timeout, args.pysymgym_path, args.assembly_infos)
-    )
+    entrypoint(Args(**vars(args)))
 
 
 if __name__ == "__main__":
