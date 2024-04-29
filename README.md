@@ -74,6 +74,6 @@ To compare two results run:
 
 ```bash 
 python3 compstrat.py \
-    -n1 AI -s1 AI_all_new.csv \
-    -n2 ETCC -s2 ExecutionTreeContributedCoverage_all.csv
+    -s1 AI -r1 AI_all_new.csv \
+    -s2 ETCC -r2 ExecutionTreeContributedCoverage_all.csv
 ```
