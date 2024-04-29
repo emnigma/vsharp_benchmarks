@@ -33,17 +33,18 @@ class DataSourceType(enum.Enum):
     INNER_JOIN_COVERAGE_EQ_DF = "Inner join dataframe with equal coverage"
 
 
-class Comparator:
-    @attrs.define
-    class CompareConfig:
-        datasource: DataSourceType
-        by_column: str
-        metric: str
-        divider_line: bool = False
-        less_is_winning: bool = False
-        logscale: bool = False
-        exp_name: str = None
+@attrs.define
+class CompareConfig:
+    datasource: DataSourceType
+    by_column: str
+    metric: str
+    divider_line: bool = False
+    less_is_winning: bool = False
+    logscale: bool = False
+    exp_name: str = None
 
+
+class Comparator:
     def __init__(self, strat1: Strategy, strat2: Strategy, saveroot: str) -> None:
         os.makedirs(saveroot, exist_ok=True)
         self.saveroot = saveroot
@@ -101,19 +102,19 @@ class Comparator:
 
         strat1_win = dataframe.loc[
             left_win_comparison(
-                dataframe[f"{config.by_column}{strat2}"],
-                dataframe[f"{config.by_column}{strat1}"],
+                dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
+                dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
             )
         ]
         strat2_win = dataframe.loc[
             left_win_comparison(
-                dataframe[f"{config.by_column}{strat1}"],
-                dataframe[f"{config.by_column}{strat2}"],
+                dataframe[f"{config.by_column}{self.strat1.strategy_name}"],
+                dataframe[f"{config.by_column}{self.strat2.strategy_name}"],
             )
         ]
         eq = dataframe.loc[
-            dataframe[f"{config.by_column}{strat2}"]
-            == dataframe[f"{config.by_column}{strat1}"]
+            dataframe[f"{config.by_column}{self.strat2.strategy_name}"]
+            == dataframe[f"{config.by_column}{self.strat1.strategy_name}"]
         ]
 
         print(f"{len(strat1_win)=}, {len(strat2_win)=}, {len(eq)=}")
@@ -138,27 +139,27 @@ class Comparator:
         ]
 
         plt.scatter(
-            strat1_win[f"{config.by_column}{strat2}"],
-            strat1_win[f"{config.by_column}{strat1}"],
+            strat1_win[f"{config.by_column}{self.strat2.strategy_name}"],
+            strat1_win[f"{config.by_column}{self.strat1.strategy_name}"],
             color=[self.strat1.color.to_rgb()],
         )
 
         plt.scatter(
-            strat2_win[f"{config.by_column}{strat2}"],
-            strat2_win[f"{config.by_column}{strat1}"],
+            strat2_win[f"{config.by_column}{self.strat2.strategy_name}"],
+            strat2_win[f"{config.by_column}{self.strat1.strategy_name}"],
             color=[self.strat2.color.to_rgb()],
         )
         plt.scatter(
-            eq[f"{config.by_column}{strat2}"],
-            eq[f"{config.by_column}{strat1}"],
+            eq[f"{config.by_column}{self.strat2.strategy_name}"],
+            eq[f"{config.by_column}{self.strat1.strategy_name}"],
             color="black",
         )
         plt.xlabel(
-            f"{strat2} {config.by_column}, {config.metric}\n\n{config.by_column} comparison on the same methods, {scale}\n"
-            f"{strat1} ({self.strat1.color.name}) won: {len(strat1_win)}, "
-            f"{strat2} ({self.strat2.color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
+            f"{self.strat2.strategy_name} {config.by_column}, {config.metric}\n\n{config.by_column} comparison on the same methods, {scale}\n"
+            f"{self.strat1.strategy_name} ({self.strat1.color.name}) won: {len(strat1_win)}, "
+            f"{self.strat2.strategy_name} ({self.strat2.color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
         )
-        plt.ylabel(f"{strat1} {config.by_column}, {config.metric}")
+        plt.ylabel(f"{self.strat1.strategy_name} {config.by_column}, {config.metric}")
         savename = (
             f"{config.on}.pdf" if config.exp_name is None else f"{config.exp_name}.pdf"
         )
@@ -171,83 +172,3 @@ class Comparator:
             self._compare(config)
 
         self.result_count_df.to_csv(os.path.join(self.saveroot, "result_count.csv"))
-
-
-compare_configs = [
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_DF,
-        by_column="coverage",
-        metric="%",
-        divider_line=True,
-        exp_name="coverage",
-    ),
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_DF,
-        by_column="tests",
-        metric="count",
-        divider_line=True,
-        less_is_winning=True,
-        logscale=True,
-        exp_name="tests",
-    ),
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_DF,
-        by_column="errors",
-        metric="count",
-        divider_line=True,
-        logscale=True,
-        exp_name="errors",
-    ),
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_DF,
-        by_column="total_time_sec",
-        metric="s",
-        divider_line=True,
-        less_is_winning=True,
-        exp_name="total_time_secs",
-    ),
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
-        by_column="tests",
-        metric="count",
-        divider_line=True,
-        less_is_winning=True,
-        logscale=True,
-        exp_name="tests_eq_coverage",
-    ),
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
-        by_column="errors",
-        metric="count",
-        divider_line=True,
-        logscale=True,
-        exp_name="errors_eq_coverage",
-    ),
-    Comparator.CompareConfig(
-        datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
-        by_column="total_time_sec",
-        metric="s",
-        divider_line=True,
-        less_is_winning=True,
-        logscale=True,
-        exp_name="total_time_eq_coverage",
-    ),
-]
-
-nn_res_path = "AI_all_new.csv"
-heuristic_res_path = "ExecutionTreeContributedCoverage_all.csv"
-
-strat1 = "AI"
-strat2 = "ETCC"
-
-
-nn_df = pd.read_csv(nn_res_path)
-heu_df = pd.read_csv(heuristic_res_path)
-
-
-comparator = Comparator(
-    Strategy("AI", nn_df, Color(255, 128, 0, "orange")),
-    Strategy("ETCC", heu_df, Color(0, 255, 183, "cyan")),
-    saveroot="report",
-)
-comparator.compare(compare_configs)

@@ -25,35 +25,18 @@ def setup_logging(strategy):
     )
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-s", "--strategy", type=str, required=True, help="V# searcher strategy"
-    )
-    parser.add_argument(
-        "-t", "--timeout", type=int, required=True, help="V# runner timeout"
-    )
-    parser.add_argument(
-        "-ps",
-        "--pysymgym-path",
-        type=pathlib.Path,
-        dest="pysymgym_path",
-        help="Absolute path to PySymGym",
-    )
+AssemblyInfo = tuple[pathlib.Path, pathlib.Path]
 
-    parser.add_argument(
-        "-as",
-        "--assembly-infos",
-        type=pathlib.Path,
-        dest="assembly_infos",
-        action="append",
-        nargs=2,
-        metavar=("dlls-path", "launch-info-path"),
-        help="Provide tuples: dir with dlls/assembly info file",
-    )
 
-    args = parser.parse_args()
+@attrs.define
+class Args:
+    strategy: str
+    timeout: int
+    pysymgym_path: pathlib.Path
+    assembly_infos: list[tuple[pathlib.Path, pathlib.Path]]
 
+
+def entrypoint(args: Args) -> pd.DataFrame:
     runner_path = pathlib.Path(
         args.pysymgym_path
         / "GameServers/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner.dll"
@@ -138,6 +121,38 @@ def main():
 
         df = pd.DataFrame(results)
         df.to_csv(f"{args.strategy}_{timestamp}.csv", index=False)
+        return df
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--strategy", type=str, required=True, help="V# searcher strategy"
+    )
+    parser.add_argument(
+        "-t", "--timeout", type=int, required=True, help="V# runner timeout"
+    )
+    parser.add_argument(
+        "-ps",
+        "--pysymgym-path",
+        type=pathlib.Path,
+        dest="pysymgym_path",
+        help="Absolute path to PySymGym",
+    )
+
+    parser.add_argument(
+        "-as",
+        "--assembly-infos",
+        type=pathlib.Path,
+        dest="assembly_infos",
+        action="append",
+        nargs=2,
+        metavar=("dlls-path", "launch-info-path"),
+        help="Provide tuples: dir with dlls/assembly info file",
+    )
+
+    args = parser.parse_args()
+    entrypoint(Args(**vars(args)))
 
 
 if __name__ == "__main__":
