@@ -1,11 +1,21 @@
-import pandas as pd
 import argparse
+
+import attrs
+import pandas as pd
 
 from compare_configs import COMPARE_CONFS
 from src.comparator import Color, Comparator, Strategy
 
 
-def entrypoint(args):
+@attrs.define
+class Args:
+    strat1: str
+    run1: str
+    strat2: str
+    run2: str
+
+
+def entrypoint(args: Args):
     df1 = pd.read_csv(args.run1)
     df2 = pd.read_csv(args.run2)
 
@@ -49,8 +59,7 @@ def main():
     )
     args = parser.parse_args()
 
-    print(args)
-    entrypoint(args)
+    entrypoint(Args(**vars(args)))
 
 
 if __name__ == "__main__":
