@@ -20,4 +20,5 @@ jobs:
     
       - name: Run comparison on test data
         run: |
+          pwd
           python3 compstrat.py -s1 BLUE -r1 gh_workflows/strat_blue.csv -s2 RED -r2 gh_workflows/strat_red.csv
