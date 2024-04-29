@@ -20,8 +20,8 @@ def entrypoint(args: Args):
     df2 = pd.read_csv(args.run2)
 
     comparator = Comparator(
-        Strategy(args.strat1, df1, Color(255, 128, 0, "orange")),
-        Strategy(args.strat2, df2, Color(0, 255, 183, "cyan")),
+        Strategy(args.strat1, df1, Color(255, 115, 0, "philippine_orange")),
+        Strategy(args.strat2, df2, Color(0, 119, 255, "blue_sparkle")),
         saveroot="report",
     )
     comparator.compare(COMPARE_CONFS)
