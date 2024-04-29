@@ -7,8 +7,6 @@ import attrs
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# searchstratcomp --(s)trategies --(p)arsedir
-
 
 @attrs.define
 class Color:
@@ -168,83 +166,73 @@ class Comparator:
             os.path.join(self.saveroot, savename), format="pdf", bbox_inches="tight"
         )
 
-    def compare(self):
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_DF,
-                by_column="coverage",
-                metric="%",
-                divider_line=True,
-                exp_name="coverage",
-            )
-        )
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_DF,
-                by_column="tests",
-                metric="count",
-                divider_line=True,
-                less_is_winning=True,
-                logscale=True,
-                exp_name="tests",
-            )
-        )
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_DF,
-                by_column="errors",
-                metric="count",
-                divider_line=True,
-                logscale=True,
-                exp_name="errors",
-            )
-        )
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_DF,
-                by_column="total_time_sec",
-                metric="s",
-                divider_line=True,
-                less_is_winning=True,
-                exp_name="total_time_secs",
-            )
-        )
-
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
-                by_column="tests",
-                metric="count",
-                divider_line=True,
-                less_is_winning=True,
-                logscale=True,
-                exp_name="tests_eq_coverage",
-            )
-        )
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
-                by_column="errors",
-                metric="count",
-                divider_line=True,
-                logscale=True,
-                exp_name="errors_eq_coverage",
-            )
-        )
-        self._compare(
-            self.CompareConfig(
-                datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
-                by_column="total_time_sec",
-                metric="s",
-                divider_line=True,
-                less_is_winning=True,
-                logscale=True,
-                exp_name="total_time_eq_coverage",
-            )
-        )
+    def compare(self, configs: list[CompareConfig]):
+        for config in configs:
+            self._compare(config)
 
         self.result_count_df.to_csv(os.path.join(self.saveroot, "result_count.csv"))
 
+
+compare_configs = [
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_DF,
+        by_column="coverage",
+        metric="%",
+        divider_line=True,
+        exp_name="coverage",
+    ),
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_DF,
+        by_column="tests",
+        metric="count",
+        divider_line=True,
+        less_is_winning=True,
+        logscale=True,
+        exp_name="tests",
+    ),
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_DF,
+        by_column="errors",
+        metric="count",
+        divider_line=True,
+        logscale=True,
+        exp_name="errors",
+    ),
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_DF,
+        by_column="total_time_sec",
+        metric="s",
+        divider_line=True,
+        less_is_winning=True,
+        exp_name="total_time_secs",
+    ),
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
+        by_column="tests",
+        metric="count",
+        divider_line=True,
+        less_is_winning=True,
+        logscale=True,
+        exp_name="tests_eq_coverage",
+    ),
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
+        by_column="errors",
+        metric="count",
+        divider_line=True,
+        logscale=True,
+        exp_name="errors_eq_coverage",
+    ),
+    Comparator.CompareConfig(
+        datasource=DataSourceType.INNER_JOIN_COVERAGE_EQ_DF,
+        by_column="total_time_sec",
+        metric="s",
+        divider_line=True,
+        less_is_winning=True,
+        logscale=True,
+        exp_name="total_time_eq_coverage",
+    ),
+]
 
 nn_res_path = "AI_all_new.csv"
 heuristic_res_path = "ExecutionTreeContributedCoverage_all.csv"
@@ -262,4 +250,4 @@ comparator = Comparator(
     Strategy("ETCC", heu_df, Color(0, 255, 183, "cyan")),
     saveroot="report",
 )
-comparator.compare()
+comparator.compare(compare_configs)
