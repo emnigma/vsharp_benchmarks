@@ -40,10 +40,10 @@ def entrypoint(args: Args) -> pd.DataFrame:
     runner_path = pathlib.Path(
         args.pysymgym_path
         / "GameServers/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner.dll"
-    ).absolute()
+    ).resolve()
     model_path = pathlib.Path(
         args.pysymgym_path / "GameServers/VSharp/VSharp.Explorer/models/model.onnx"
-    ).absolute()
+    ).resolve()
 
     setup_logging(strategy=args.strategy)
 
@@ -51,8 +51,8 @@ def entrypoint(args: Args) -> pd.DataFrame:
         itertools.chain(
             *[
                 load_config(
-                    pathlib.Path(dll_path).absolute(),
-                    pathlib.Path(launch_info).absolute(),
+                    pathlib.Path(dll_path).resolve(),
+                    pathlib.Path(launch_info).resolve(),
                 )
                 for dll_path, launch_info in args.assembly_infos
             ]
@@ -119,9 +119,9 @@ def entrypoint(args: Args) -> pd.DataFrame:
 
         results.append(attrs.asdict(run_result))
 
-        df = pd.DataFrame(results)
-        df.to_csv(f"{args.strategy}_{timestamp}.csv", index=False)
-        return df
+    df = pd.DataFrame(results)
+    df.to_csv(f"{args.strategy}_{timestamp}.csv", index=False)
+    return df
 
 
 def main():
@@ -152,7 +152,10 @@ def main():
     )
 
     args = parser.parse_args()
-    entrypoint(Args(**vars(args)))
+
+    entrypoint(
+        Args(args.strategy, args.timeout, args.pysymgym_path, args.assembly_infos)
+    )
 
 
 if __name__ == "__main__":
