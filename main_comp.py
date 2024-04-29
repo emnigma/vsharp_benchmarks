@@ -1,3 +1,4 @@
+import json
 import os
 import warnings
 
@@ -24,6 +25,7 @@ class Color:
 class Strategy:
     strategy_name: str
     strategy_df: pd.DataFrame
+    color: Color
 
 
 class Comparator:
@@ -36,6 +38,16 @@ class Comparator:
             columns=[f"{strat1.strategy_name}_won", f"{strat2.strategy_name}_won", "eq"]
         )
 
+        with open(os.path.join(self.saveroot, "symdiff_starts_methods.json"), "w") as f:
+            json.dump(
+                list(
+                    set(strat1.strategy_df["method"]).symmetric_difference(
+                        set(strat2.strategy_df["method"])
+                    )
+                ),
+                f,
+                indent=4,
+            )
         self.drop_failed()
 
     def _drop_failed(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -56,9 +68,6 @@ class Comparator:
         logscale: bool = False,
         exp_name: str = None,
     ):
-        strat1_color = Color(255, 128, 0, "orange")
-        strat2_color = Color(0, 255, 183, "cyan")
-
         def left_win_comparison(left, right):
             if less_is_winning:
                 return left < right
@@ -92,18 +101,19 @@ class Comparator:
         plt.scatter(
             strat1_win[f"{on}{strat2}"],
             strat1_win[f"{on}{strat1}"],
-            color=[strat1_color.to_rgb()],
+            color=[self.strat1.color.to_rgb()],
         )
+
         plt.scatter(
             strat2_win[f"{on}{strat2}"],
             strat2_win[f"{on}{strat1}"],
-            color=[strat2_color.to_rgb()],
+            color=[self.strat2.color.to_rgb()],
         )
         plt.scatter(eq[f"{on}{strat2}"], eq[f"{on}{strat1}"], color="black")
         plt.xlabel(
             f"{strat2} {on}, {metric}\n\n{on} comparison on the same methods, {scale}\n"
-            f"{strat1} ({strat1_color.name}) won: {len(strat1_win)}, "
-            f"{strat2} ({strat2_color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
+            f"{strat1} ({self.strat1.color.name}) won: {len(strat1_win)}, "
+            f"{strat2} ({self.strat2.color.name}) won: {len(strat2_win)}, eq: {len(eq)}"
         )
         plt.ylabel(f"{strat1} {on}, {metric}")
         savename = f"{on}.pdf" if exp_name is None else f"{exp_name}.pdf"
@@ -197,15 +207,8 @@ heu_df = pd.read_csv(heuristic_res_path)
 
 
 comparator = Comparator(
-    Strategy("AI", nn_df), Strategy("ETCC", heu_df), saveroot="report"
+    Strategy("AI", nn_df, Color(255, 128, 0, "orange")),
+    Strategy("ETCC", heu_df, Color(0, 255, 183, "cyan")),
+    saveroot="report",
 )
 comparator.compare()
-
-# set(pd.read_csv(nn_res_path)["method"]).symmetric_difference(
-#     set(pd.read_csv(heuristic_res_path)["method"])
-# )
-
-
-# def drop_failed(df: pd.DataFrame) -> int:
-#     failed = df[(df["coverage"] == -1)].index
-#     return failed
