@@ -10,3 +10,6 @@ dotCover.Output.*
 /**/*.csv
 
 .DS_Store
+
+.*env/
+.vscode/
