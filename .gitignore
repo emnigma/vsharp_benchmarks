@@ -8,7 +8,7 @@ gentests
 
 dotCover.Output.*
 /**/*.csv
-!mock_runs/*.csv
+!tests/resources/mock_runs/*.csv
 
 .DS_Store
 

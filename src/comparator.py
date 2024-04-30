@@ -181,6 +181,7 @@ class Comparator:
         plt.savefig(
             os.path.join(self.savedir, savename), format="pdf", bbox_inches="tight"
         )
+        plt.clf()
 
     def compare(self, configs: list[CompareConfig]):
         for config in tqdm.tqdm(
