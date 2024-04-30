@@ -20,4 +20,4 @@ jobs:
     
       - name: Run comparison on test data
         run: |
-          python3 compstrat.py -s1 BLUE -r1 mock_runs/strat_alpha.csv -s2 RED -r2 mock_runs/strat_beta.csv
+          python3 compstrat.py -s1 ALPHA -r1 mock_runs/strat_alpha.csv -s2 BETA -r2 mock_runs/strat_beta.csv --savedir ./sdir
