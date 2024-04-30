@@ -60,11 +60,10 @@ class Comparator:
         self,
         strat1: Strategy,
         strat2: Strategy,
-        saveroot: str,
+        savedir: str,
         eq_color: Color = Color(0, 0, 0, "black"),
     ) -> None:
-        os.makedirs(saveroot, exist_ok=True)
-        self.saveroot = saveroot
+        self.savedir = savedir
         self.strat1 = strat1
         self.strat2 = strat2
         self.result_count_df = pd.DataFrame(
@@ -72,7 +71,7 @@ class Comparator:
         )
         self.eq_color = eq_color
 
-        with open(os.path.join(self.saveroot, "symdiff_starts_methods.json"), "w") as f:
+        with open(os.path.join(self.savedir, "symdiff_starts_methods.json"), "w") as f:
             json.dump(
                 list(
                     set(strat1.df["method"]).symmetric_difference(
@@ -180,7 +179,7 @@ class Comparator:
             f"{config.on}.pdf" if config.exp_name is None else f"{config.exp_name}.pdf"
         )
         plt.savefig(
-            os.path.join(self.saveroot, savename), format="pdf", bbox_inches="tight"
+            os.path.join(self.savedir, savename), format="pdf", bbox_inches="tight"
         )
 
     def compare(self, configs: list[CompareConfig]):
@@ -189,4 +188,4 @@ class Comparator:
         ):
             self._compare(config)
 
-        self.result_count_df.to_csv(os.path.join(self.saveroot, "result_count.csv"))
+        self.result_count_df.to_csv(os.path.join(self.savedir, "result_count.csv"))

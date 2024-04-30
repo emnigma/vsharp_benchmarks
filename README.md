@@ -70,7 +70,7 @@ options:
   -r2 RUN2, --run2 RUN2
                         Path to ther second strategy run result
 ```
-To compare two results run:
+To compare two results run
 
 ```bash 
 python3 compstrat.py \
@@ -78,5 +78,5 @@ python3 compstrat.py \
     -s2 BETA -r2 mock_runs/strat_beta.csv
 ```
 
-Output example:
+Output example
 ![resources/alpha_beta_comp_vis_example.png](resources/alpha_beta_comp_vis_example.png)
