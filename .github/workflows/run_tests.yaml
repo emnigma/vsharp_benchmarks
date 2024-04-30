@@ -1,4 +1,4 @@
-name: Run comparison
+name: Run tests
 
 on: [pull_request]
 
@@ -18,6 +18,6 @@ jobs:
         run: |
           pip install -r requirements.txt
     
-      - name: Run comparison on test data
+      - name: Run tests
         run: |
-          python3 compstrat.py -s1 ALPHA -r1 mock_runs/strat_alpha.csv -s2 BETA -r2 mock_runs/strat_beta.csv --savedir ./sdir
+          pytest tests -sv

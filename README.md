@@ -56,8 +56,8 @@ python3 runstrat.py \
 ### Comparison
 
 Docs:
-```bash 
-usage: compstrat.py [-h] -s1 STRAT1 -r1 RUN1 -s2 STRAT2 -r2 RUN2
+```bash
+usage: compstrat.py [-h] -s1 STRAT1 -r1 RUN1 -s2 STRAT2 -r2 RUN2 [--savedir SAVEDIR]
 
 options:
   -h, --help            show this help message and exit
@@ -69,10 +69,11 @@ options:
                         Name of the second strategy
   -r2 RUN2, --run2 RUN2
                         Path to ther second strategy run result
+  --savedir SAVEDIR     Path to save results to
 ```
 To compare two results run
 
-```bash 
+```bash
 python3 compstrat.py \
     -s1 ALHPA -r1 mock_runs/strat_alpha.csv \
     -s2 BETA -r2 mock_runs/strat_beta.csv
