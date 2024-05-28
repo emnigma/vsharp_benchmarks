@@ -4,7 +4,7 @@
 
 ```bash
 python3 -m venv .env
-soure .env/bin/activate
+source .env/bin/activate
 pip install -r requirements.txt
 ```
 
