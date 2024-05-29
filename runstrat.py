@@ -131,7 +131,8 @@ def main():
         "--model-path",
         type=pathlib.Path,
         dest="model_path",
-        help="Absolute path to AI model",
+        required=False,
+        help="Absolute path to AI model if AI strategy is selected",
     )
     parser.add_argument(
         "-t", "--timeout", type=int, required=True, help="V# runner timeout"
@@ -143,7 +144,6 @@ def main():
         dest="pysymgym_path",
         help="Absolute path to PySymGym",
     )
-
     parser.add_argument(
         "-as",
         "--assembly-infos",
