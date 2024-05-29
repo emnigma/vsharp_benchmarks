@@ -39,7 +39,7 @@ class Strategy:
 
 
 class DataSourceType(enum.Enum):
-    RAW_DF = "Unprocessed dataframe"
+    OUTER_JOIN = "Outer join dataframe"
     INNER_JOIN_DF = "Inner join dataframe"
     INNER_JOIN_COVERAGE_EQ_DF = "Inner join dataframe with equal coverage"
 
@@ -83,6 +83,13 @@ class Comparator:
             )
         self.drop_failed()
 
+        self.outer_df = self.strat1.df.merge(
+            self.strat2.df,
+            on="method",
+            how="outer",
+            suffixes=(self.strat1.name, self.strat2.name),
+        )
+
         self.inner_df = self.strat1.df.merge(
             self.strat2.df,
             on="method",
@@ -110,7 +117,7 @@ class Comparator:
             return left > right
 
         match config.datasource:
-            case DataSourceType.RAW_DF:
+            case DataSourceType.OUTER_JOIN:
                 dataframe = self.inner_df
             case DataSourceType.INNER_JOIN_DF:
                 dataframe = self.inner_df
