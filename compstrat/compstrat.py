@@ -1,11 +1,13 @@
 import argparse
 import os
+import pathlib
+import typing as t
 
 import attrs
 import pandas as pd
 
-from compare_configs import COMPARE_CONFS
-from src.comparator import Color, Comparator, Strategy
+from src.comparator import Color, Comparator, CompareConfig, Strategy
+from src.compstrat_config_extractor import read_configs
 
 
 @attrs.define
@@ -14,7 +16,8 @@ class Args:
     run1: str
     strat2: str
     run2: str
-    savedir: str
+    savedir: pathlib.Path
+    configs: t.Sequence[CompareConfig]
 
 
 def entrypoint(args: Args):
@@ -29,7 +32,7 @@ def entrypoint(args: Args):
         strat2=create(args.strat2, args.run2, blue_sparkle),
         savedir=args.savedir,
     )
-    comparator.compare(COMPARE_CONFS)
+    comparator.compare(args.configs)
 
 
 def main():
@@ -63,15 +66,31 @@ def main():
         help="Path to ther second strategy run result",
     )
     parser.add_argument(
+        "-cp",
+        "--configs-path",
+        type=pathlib.Path,
+        required=True,
+        help="Path to ther second strategy run result",
+    )
+    parser.add_argument(
         "--savedir",
-        type=str,
+        type=pathlib.Path,
         required=False,
         default="report",
         help="Path to save results to",
     )
     args = parser.parse_args()
 
-    entrypoint(Args(**vars(args)))
+    entrypoint(
+        Args(
+            strat1=args.strat1,
+            run1=args.run1,
+            strat2=args.strat2,
+            run2=args.run2,
+            savedir=args.savedir,
+            configs=read_configs(args.configs_path),
+        )
+    )
 
 
 if __name__ == "__main__":

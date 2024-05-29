@@ -11,15 +11,16 @@ import pandas as pd
 import tqdm
 
 from src.parsing import load_config, parse_runner_output
+from src.psstrategy import BasePSStrategy
 from src.structs import RunResult
 from src.subprocess_calls import call_test_runner
 
 timestamp = datetime.fromtimestamp(datetime.now().timestamp())
 
 
-def setup_logging(strategy):
+def setup_logging(strategy_name: str):
     logging.basicConfig(
-        filename=f"{strategy}_{timestamp}.log",
+        filename=f"{strategy_name}_{timestamp}.log",
         format="%(asctime)s - p%(process)d: %(name)s - [%(levelname)s]: %(message)s",
         level=logging.INFO,
     )
@@ -30,7 +31,7 @@ AssemblyInfo = tuple[pathlib.Path, pathlib.Path]
 
 @attrs.define
 class Args:
-    strategy: str
+    strategy: BasePSStrategy
     timeout: int
     pysymgym_path: pathlib.Path
     assembly_infos: list[tuple[pathlib.Path, pathlib.Path]]
@@ -41,11 +42,8 @@ def entrypoint(args: Args) -> pd.DataFrame:
         args.pysymgym_path
         / "GameServers/VSharp/VSharp.Runner/bin/Release/net7.0/VSharp.Runner.dll"
     ).resolve()
-    model_path = pathlib.Path(
-        args.pysymgym_path / "GameServers/VSharp/VSharp.Explorer/models/model.onnx"
-    ).resolve()
 
-    setup_logging(strategy=args.strategy)
+    setup_logging(strategy_name=args.strategy.name)
 
     assembled = list(
         itertools.chain(
@@ -62,15 +60,14 @@ def entrypoint(args: Args) -> pd.DataFrame:
     logging.info(args)
     results = []
 
-    for launch_info in tqdm.tqdm(assembled, desc=args.strategy):
+    for launch_info in tqdm.tqdm(assembled, desc=args.strategy.name):
         try:
             call, runner_output = call_test_runner(
                 path_to_runner=runner_path,
                 launch_info=launch_info,
-                strat_name=args.strategy,
+                strategy=args.strategy,
                 wdir=runner_path.parent,
                 timeout=args.timeout,
-                model_path=model_path,
             )
         except subprocess.CalledProcessError as cpe:
             logging.error(
@@ -130,6 +127,14 @@ def main():
         "-s", "--strategy", type=str, required=True, help="V# searcher strategy"
     )
     parser.add_argument(
+        "-mp",
+        "--model-path",
+        type=pathlib.Path,
+        dest="model_path",
+        required=False,
+        help="Absolute path to AI model if AI strategy is selected",
+    )
+    parser.add_argument(
         "-t", "--timeout", type=int, required=True, help="V# runner timeout"
     )
     parser.add_argument(
@@ -139,7 +144,6 @@ def main():
         dest="pysymgym_path",
         help="Absolute path to PySymGym",
     )
-
     parser.add_argument(
         "-as",
         "--assembly-infos",
@@ -153,7 +157,19 @@ def main():
 
     args = parser.parse_args()
 
-    entrypoint(Args(**vars(args)))
+    default_model_path = pathlib.Path(
+        args.pysymgym_path / "GameServers/VSharp/VSharp.Explorer/models/model.onnx"
+    ).resolve()
+    entrypoint(
+        Args(
+            strategy=BasePSStrategy.parse(
+                args.strategy, model_path=args.model_path or default_model_path
+            ),
+            timeout=args.timeout,
+            pysymgym_path=args.pysymgym_path,
+            assembly_infos=args.assembly_infos,
+        )
+    )
 
 
 if __name__ == "__main__":

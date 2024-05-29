@@ -1,16 +1,18 @@
 __pycache__
 
 *.log
-prebuilt/*
-!prebuilt/*.json
-!prebuilt/*.csv
+runstrat/prebuilt/*
+runstrat/!prebuilt/*.json
+runstrat/!prebuilt/*.csv
 gentests
 
 dotCover.Output.*
 /**/*.csv
-!tests/resources/mock_runs/*.csv
+!compstrat/tests/resources/mock_runs/*.csv
 
 .DS_Store
 
 .*env/
 .vscode/
+
+report/

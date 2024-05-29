@@ -2,16 +2,16 @@ import subprocess
 
 import func_timeout
 
+from src.psstrategy import AIStrategy, BasePSStrategy
 from src.structs import LaunchInfo
 
 
 def call_test_runner(
     path_to_runner: str,
     launch_info: LaunchInfo,
-    strat_name: str,
+    strategy: BasePSStrategy,
     wdir: str,
     timeout: int,
-    model_path: str,
 ):
     call = [
         "dotnet",
@@ -22,11 +22,16 @@ def call_test_runner(
         "--timeout",
         str(timeout),
         "--strat",
-        strat_name,
+        strategy.name,
         "--check-coverage",
-        "--model",
-        model_path,
     ]
+
+    match strategy:
+        case AIStrategy(_, model_path):
+            call += (
+                "--model",
+                model_path,
+            )
 
     def runner_fun(call, wdir):
         return subprocess.check_output(call, stderr=subprocess.STDOUT, cwd=wdir).decode(

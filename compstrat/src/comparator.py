@@ -39,9 +39,12 @@ class Strategy:
 
 
 class DataSourceType(enum.Enum):
-    OUTER_JOIN = "Outer join dataframe"
-    INNER_JOIN_DF = "Inner join dataframe"
-    INNER_JOIN_COVERAGE_EQ_DF = "Inner join dataframe with equal coverage"
+    # Outer join dataframe
+    OUTER_JOIN = "OUTER_JOIN"
+    # Inner join dataframe
+    INNER_JOIN_DF = "INNER_JOIN_DF"
+    # Inner join dataframe with equal coverage
+    INNER_JOIN_COVERAGE_EQ_DF = "INNER_JOIN_COVERAGE_EQ_DF"
 
 
 @attrs.define
