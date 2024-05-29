@@ -1,9 +1,9 @@
 __pycache__
 
 *.log
-prebuilt/*
-!prebuilt/*.json
-!prebuilt/*.csv
+runstrat/prebuilt/*
+runstrat/!prebuilt/*.json
+runstrat/!prebuilt/*.csv
 gentests
 
 dotCover.Output.*
@@ -14,3 +14,5 @@ dotCover.Output.*
 
 .*env/
 .vscode/
+
+report/
