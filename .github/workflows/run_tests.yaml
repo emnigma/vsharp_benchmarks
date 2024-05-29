@@ -21,4 +21,4 @@ jobs:
       - name: Run compstrat tests
         working-directory: compstrat
         run: |
-          python3 -m pytest tests -sv
+          pytest tests -sv
